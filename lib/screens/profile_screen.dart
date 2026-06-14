@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/app_settings.dart';
+import '../utils/export_service.dart';
+import 'calculator_screen.dart';
+import 'barcode_screen.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -46,11 +49,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _openSettings() async {
-    final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-    if (result == true) {
-      _load();
-      widget.onThemeChanged();
+    final result = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+    if (result == true) { _load(); widget.onThemeChanged(); }
+  }
+
+  Future<void> _exportData() async {
+    try {
+      await ExportService.exportToExcel();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Excel-файл сохранён и отправлен'),
+        backgroundColor: Colors.green,
+      ));
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка экспорта: $e'), backgroundColor: Colors.red));
     }
+  }
+
+  void _openCalculator() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const CalculatorScreen()));
+  }
+
+  void _openBarcode() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const BarcodeScreen()));
   }
 
   @override
@@ -116,8 +138,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: _openSettings,
                 ),
               ),
+              const SizedBox(height: 12),
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  leading: const Icon(Icons.file_download),
+                  title: const Text('Экспорт в Excel'),
+                  subtitle: const Text('Выгрузить товары в XLSX'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _exportData,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  leading: const Icon(Icons.calculate),
+                  title: const Text('Калькулятор'),
+                  subtitle: const Text('Подсчёт суммы, количества'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _openCalculator,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  leading: const Icon(Icons.qr_code),
+                  title: const Text('Штрих-коды'),
+                  subtitle: const Text('Генератор и сканер'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _openBarcode,
+                ),
+              ),
               const SizedBox(height: 24),
-              Center(child: Text('Учёт товаров v1.0', style: TextStyle(color: theme.colorScheme.outline, fontSize: 12))),
+              Center(child: Text('Учёт товаров v2.0', style: TextStyle(color: theme.colorScheme.outline, fontSize: 12))),
             ],
           ),
     );

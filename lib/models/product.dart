@@ -5,6 +5,7 @@ class Product {
   int quantity;
   final double price;
   final String? description;
+  final String? barcode;
   final String createdAt;
   final String updatedAt;
 
@@ -15,6 +16,7 @@ class Product {
     this.quantity = 0,
     this.price = 0.0,
     this.description,
+    this.barcode,
     String? createdAt,
     String? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now().toIso8601String(),
@@ -28,6 +30,7 @@ class Product {
       'quantity': quantity,
       'price': price,
       'description': description,
+      'barcode': barcode,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -41,6 +44,7 @@ class Product {
       quantity: map['quantity'] as int? ?? 0,
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       description: map['description'] as String?,
+      barcode: map['barcode'] as String?,
       createdAt: map['createdAt'] as String?,
       updatedAt: map['updatedAt'] as String?,
     );
@@ -53,6 +57,7 @@ class Product {
     int? quantity,
     double? price,
     String? description,
+    String? barcode,
     String? createdAt,
     String? updatedAt,
   }) {
@@ -63,6 +68,7 @@ class Product {
       quantity: quantity ?? this.quantity,
       price: price ?? this.price,
       description: description ?? this.description,
+      barcode: barcode ?? this.barcode,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now().toIso8601String(),
     );

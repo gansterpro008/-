@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 class CurrencyUtil {
-  static const symbol = '₽';
+  static const symbol = 'руб';
 
   static String formatPrice(double price) {
     return '${NumberFormat('#,###.##').format(price)} $symbol';

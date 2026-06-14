@@ -130,7 +130,7 @@ class _SaleScreenState extends State<SaleScreen> {
           const SizedBox(height: 12),
           TextFormField(
             controller: _priceCtrl,
-            decoration: const InputDecoration(labelText: 'Цена за единицу (₽)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.monetization_on_outlined)),
+            decoration: const InputDecoration(labelText: 'Цена за единицу (руб)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.monetization_on_outlined)),
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 12),

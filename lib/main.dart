@@ -4,9 +4,14 @@ import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final db = DatabaseHelper();
-  final settings = await db.getSettings();
-  final initialTheme = settings.themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light;
+  late ThemeMode initialTheme;
+  try {
+    final db = DatabaseHelper();
+    final settings = await db.getSettings();
+    initialTheme = settings.themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light;
+  } catch (e) {
+    initialTheme = ThemeMode.light;
+  }
   runApp(WarehouseApp(initialTheme: initialTheme));
 }
 
@@ -28,11 +33,13 @@ class _WarehouseAppState extends State<WarehouseApp> {
   }
 
   Future<void> refreshTheme() async {
-    final db = DatabaseHelper();
-    final settings = await db.getSettings();
-    if (mounted) {
-      setState(() => _themeMode = settings.themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light);
-    }
+    try {
+      final db = DatabaseHelper();
+      final settings = await db.getSettings();
+      if (mounted) {
+        setState(() => _themeMode = settings.themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light);
+      }
+    } catch (_) {}
   }
 
   @override

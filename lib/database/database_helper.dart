@@ -22,7 +22,7 @@ class DatabaseHelper {
     final path = join(dbPath, 'warehouse.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -37,6 +37,7 @@ class DatabaseHelper {
         quantity INTEGER DEFAULT 0,
         price REAL DEFAULT 0.0,
         description TEXT,
+        barcode TEXT,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )
@@ -73,6 +74,9 @@ class DatabaseHelper {
         )
       ''');
     }
+    if (oldVersion < 3) {
+      try { await db.execute('ALTER TABLE products ADD COLUMN barcode TEXT'); } catch (_) {}
+    }
   }
 
   Future<int> insertProduct(Product product) async {
@@ -101,8 +105,8 @@ class DatabaseHelper {
     final where = <String>[];
     final args = <dynamic>[];
     if (search != null && search.isNotEmpty) {
-      where.add('(name LIKE ? OR category LIKE ?)');
-      args.addAll(['%$search%', '%$search%']);
+      where.add('(name LIKE ? OR category LIKE ? OR barcode LIKE ?)');
+      args.addAll(['%$search%', '%$search%', '%$search%']);
     }
     if (category != null && category.isNotEmpty) {
       where.add('category = ?');
@@ -115,6 +119,13 @@ class DatabaseHelper {
       orderBy: 'name ASC',
     );
     return maps.map((m) => Product.fromMap(m)).toList();
+  }
+
+  Future<Product?> getProductByBarcode(String barcode) async {
+    final db = await database;
+    final maps = await db.query('products', where: 'barcode = ?', whereArgs: [barcode.trim()], limit: 1);
+    if (maps.isEmpty) return null;
+    return Product.fromMap(maps.first);
   }
 
   Future<List<String>> getCategories() async {
@@ -289,7 +300,8 @@ class DatabaseHelper {
   }
 
   Future<AppSettings> getSettings() async {
-    final db = await database;
+    Database? db;
+    try { db = await database; } catch (e) { return AppSettings(); }
     final maps = await db.query('settings');
     final map = <String, String>{};
     for (final row in maps) {
@@ -309,5 +321,10 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllProducts() async {
+    final db = await database;
+    return db.query('products', orderBy: 'name ASC');
   }
 }

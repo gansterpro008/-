@@ -14,7 +14,10 @@ class _CounterpartiesScreenState extends State<CounterpartiesScreen> with Automa
   final _db = DatabaseHelper();
   List<Map<String, dynamic>> _suppliers = [];
   List<Map<String, dynamic>> _buyers = [];
+  List<Map<String, dynamic>> _suppliersFiltered = [];
+  List<Map<String, dynamic>> _buyersFiltered = [];
   bool _loading = true;
+  String _searchQuery = '';
 
   @override
   bool get wantKeepAlive => true;
@@ -51,6 +54,8 @@ class _CounterpartiesScreenState extends State<CounterpartiesScreen> with Automa
     setState(() {
       _suppliers = suppliers.values.toList()..sort((a, b) => (b['totalSum'] as num).compareTo(a['totalSum'] as num));
       _buyers = buyers.values.toList()..sort((a, b) => (b['totalSum'] as num).compareTo(a['totalSum'] as num));
+      _suppliersFiltered = List.from(_suppliers);
+      _buyersFiltered = List.from(_buyers);
       _loading = false;
     });
   }
@@ -65,10 +70,28 @@ class _CounterpartiesScreenState extends State<CounterpartiesScreen> with Automa
       appBar: AppBar(title: const Text('Контрагенты'), centerTitle: true),
       body: _loading ? const Center(child: CircularProgressIndicator())
         : DefaultTabController(length: 2, child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Поиск контрагента...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
+                onChanged: (v) {
+                  setState(() {
+                    _searchQuery = v.toLowerCase();
+                    _suppliersFiltered = _suppliers.where((s) => (s['name'] as String).toLowerCase().contains(_searchQuery)).toList();
+                    _buyersFiltered = _buyers.where((b) => (b['name'] as String).toLowerCase().contains(_searchQuery)).toList();
+                  });
+                },
+              ),
+            ),
             TabBar(tabs: [Tab(text: 'Поставщики (${_suppliers.length})'), Tab(text: 'Покупатели (${_buyers.length})')]),
             Expanded(child: TabBarView(children: [
-              _listView(_suppliers, true, theme, numFmt),
-              _listView(_buyers, false, theme, numFmt),
+              _listView(_suppliersFiltered, true, theme, numFmt),
+              _listView(_buyersFiltered, false, theme, numFmt),
             ])),
           ])),
     );

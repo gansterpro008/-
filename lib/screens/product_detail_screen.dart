@@ -77,6 +77,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     const SizedBox(height: 4),
                     Text(_product.description!, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                   ],
+                  if (_product.barcode != null) ...[
+                    const SizedBox(height: 8),
+                    _infoRow(Icons.qr_code, 'Штрих-код', _product.barcode!),
+                  ],
                   const SizedBox(height: 8),
                   _infoRow(Icons.calendar_today, 'Создан', fmt.format(DateTime.parse(_product.createdAt))),
                   _infoRow(Icons.update, 'Изменён', fmt.format(DateTime.parse(_product.updatedAt))),
